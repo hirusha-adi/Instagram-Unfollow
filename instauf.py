@@ -171,5 +171,6 @@ class InstagramUnfollower:
         self.unFollowInstagram()
 
 
-x = InstagramUnfollower()
-x.startUnfollowing()
+if __name__ == "__main__":
+    x = InstagramUnfollower()
+    x.startUnfollowing()
