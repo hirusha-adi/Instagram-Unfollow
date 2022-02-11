@@ -3,10 +3,12 @@ import os
 import sys
 import time
 from selenium import webdriver
+import warnings
 
 
-class Utilities:
-    def __init__(self, email: str = None,
+class InstagramUnfollower:
+    def __init__(self,
+                 email: str = None,
                  password: str = None,
                  profile_link: str = None,
                  executable_path: str = None
@@ -16,6 +18,7 @@ class Utilities:
         self._password = None
         self._profile_link = None
         self._executable_path = None
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         if os.name == 'nt':
             self._pip = "pip"
@@ -23,7 +26,7 @@ class Utilities:
             self._clear = "cls"
         else:
             self._pip = "pip3"
-            self._python, = "python3"
+            self._python = "python3"
             self._cleartxt = "clear"
 
     def setEmail(self, email: str = None):
@@ -44,6 +47,9 @@ class Utilities:
         else:
             self._profile_link = profile_link
 
+    def setWebDriver(self, web_driver_path: str = None):
+        self._executable_path = web_driver_path
+
     def pip_install(self, name: str, additional_options: str = "-U"):
         os.system(self._pip + " install " + additional_options + name)
 
@@ -54,6 +60,11 @@ class Utilities:
         if isinstance(t, str):
             t = float(t)
         time.sleep(t)
+
+    def loadDict(self, email: str, password: str, profile_link: str):
+        self._email = email
+        self._password = password
+        self._profile_link = profile_link
 
     def checkFile(self, filename: str = "login.txt"):
         if filename in os.listdir(os.getcwd()):
@@ -98,7 +109,7 @@ class Utilities:
 
         driver.get("https://www.instagram.com/")
 
-        print("Waiting to load")
+        print("[+] Waiting 5 seconds until instagram home page loads")
         time.sleep(5)
 
         driver.find_element_by_xpath("//input[@name=\"username\"]")\
@@ -108,33 +119,57 @@ class Utilities:
         driver.find_element_by_xpath('//button[@type="submit"]')\
             .click()
 
-        print("Waiting to load")
+        print("[+] Waiting 4 seconds until login completes")
         time.sleep(4)
 
         driver.get(self._profile_link)
 
-        print("Waiting to load")
+        print("[+] Waiting 5 seconds until profile opens")
         time.sleep(5)
 
         following = driver.find_element_by_partial_link_text("following")
         following.click()
 
-        print("Waiting to load")
+        print("[+] Waiting 5 seconds until 'Following' opens")
         time.sleep(3)
 
         temp = driver.find_elements_by_tag_name('button')
         print("\n\n")
         count = 1
         for i in temp:
-            print(count, ":", i.text)
             if str(i.text).strip() == "Following":
                 i.click()
+
                 time.sleep(1)
+
                 secondbtn = driver.find_element_by_xpath(
                     '//button[text()="Unfollow"]')
                 secondbtn.click()
+
+                print("[" + str(count) + "]" + " : Unfollowed")
                 time.sleep(1.5)
+
             count += 1
 
     def startUnfollowing(self):
-        pass
+        self.clear()
+        filename = self.checkFile()
+        if not(filename is None):
+            logininfo = self.loadFile()
+        else:
+            logininfo = None
+
+        if logininfo is None:
+            self.setEmail()
+            self.setPassword()
+            self.setProfileLink()
+        else:
+            self.loadDict(email=logininfo["email"],
+                          password=logininfo["password"],
+                          profile_link=logininfo["profile_link"])
+
+        self.unFollowInstagram()
+
+
+x = InstagramUnfollower()
+x.startUnfollowing()
