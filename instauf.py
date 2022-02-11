@@ -69,6 +69,8 @@ class InstagramUnfollower:
     def checkFile(self, filename: str = "login.txt"):
         if filename in os.listdir(os.getcwd()):
             return os.path.join(os.getcwd(), filename)
+        elif "login.json" in os.listdir(os.getcwd()):
+            return os.path.join(os.getcwd(), "login.json")
         else:
             return None
 
